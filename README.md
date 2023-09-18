@@ -3,7 +3,9 @@ Role Name
 
 This role allows you to deploy Apache on a CentOS and/or Debian Linux server.
 
-> ansible-galaxy install erickmpene.ansible_mini_projet
+```sh
+ansible-galaxy install erickmpene.ansible_mini_projet
+``` 
 
 Requirements
 ------------
