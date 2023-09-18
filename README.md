@@ -1,7 +1,7 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+This role allows you to deploy Apache on a CentOS and/or Debian Linux server.
 
 Requirements
 ------------
@@ -35,4 +35,4 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Nothing to say

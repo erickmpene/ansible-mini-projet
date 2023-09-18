@@ -1,6 +1,6 @@
 ---
 admin: wheel
-installer: yum
+
 web_package: httpd
 web_service: httpd
 web_group: apache

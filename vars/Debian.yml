@@ -1,5 +1,5 @@
 ---
-installer: apt
+
 web_package: apache2, ufw
 admin: sudo
 web_group: www-data
