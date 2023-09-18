@@ -1,5 +1,108 @@
 ---
 - hosts: localhost
-  remote_user: root
+  remote_user: cool
+  become: yes
   roles:
-    - ansible-mini-projet
+    - apache
+  vars:
+    ansible_user: cool
+    ansible_ssh_private_key_file: '/home/cool/.ssh/id_rsa'
+  handlers:
+    - name: restart_web
+      systemd:
+        name: "{{ web_service }}"
+        state: restarted
+
+  tasks:
+    - name: install apache
+      yum:
+        name: httpd
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: install apache
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Debian"
+
+    - name: Start apache
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Debian"
+
+    - name: Start apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: ServerName Directive
+      lineinfile:
+        path: "/etc/apache2/sites-available/000-default.conf"
+        regexp: '^ServerName'
+        insertafter: '^#ServerName'
+        line: "ServerName {{ ansible_fqdn }}:80"
+      notify: restart_web
+      when: ansible_distribution == "Debian"
+
+    - name: DocRoot Permissions
+      file:
+        path: "/var/www/html"
+        mode: '3750'
+        owner: 'root'
+        group: www-data
+      when: ansible_distribution == "Debian"
+  
+    - name: DocRoot Permissions
+      file:
+        path: "/var/www/html"
+        mode: '3750'
+        owner: 'root'
+        group: apache
+      when: ansible_distribution == "CentOS"
+  
+    - name: Copy websitefile template
+      template:
+        src: '../templates/index.html.j2'
+        dest: "/var/www/html/index.html"
+
+    - name: firewalld Centos
+      systemd:
+        name: firewalld
+        enabled: true
+        state: started
+      when: ansible_distribution == "CentOS"
+
+    - name: firewall Debian
+      systemd:
+        name: ufw
+        enabled: true
+        state: started
+      when: ansible_distribution == "Debian"
+
+    - name: Open http port Debian
+      ufw:
+        port: "{{ item }}"
+        rule: allow
+        state: enabled
+      when: ansible_distribution == "Debian"
+      loop:
+        - http
+        - ssh
+
+    - name: Open http port CentOS
+      firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      when: ansible_distribution == "CentOS"
+      loop:
+        - http
+        - ssh
+        - https

@@ -1,20 +1,6 @@
 ---
 
-- name: apache
-  hosts: webserver
-  handlers:
-    - name: restart_web
-      systemd:
-        name: "{{ web_service }}"
-        state: restarted
-  tasks:
-    - name: install apache
-      package:
-        name: "{{ web_service }}"
-        state: latest
-    - name: ServerName
-      lineinfile:
-        path: "{{ web_path }}"
-        regexp: '^ServerName'
-        insertafter: '^#ServerName'
-        
+- hosts: all
+  become: yes
+  roles:
+    - ../apache

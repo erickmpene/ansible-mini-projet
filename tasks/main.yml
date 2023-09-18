@@ -1,2 +1,88 @@
 ---
-# tasks file for ansible-mini-projet
+# tasks file for roles/apache
+- name: Load a variable file based on the OS type
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - '{{ansible_distribution}}.yml'
+      paths:
+        - 'vars'
+- name: install apache
+  yum:
+    name: "{{ web_package }}"
+    state: latest
+  when: ansible_distribution == "CentOS"
+  notify: restart_web
+
+- name: install apache
+  apt:
+    name: "{{ web_package }}"
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Debian"
+
+- name: Start apache
+  service:
+    name: "{{ web_service }}"
+    state: started
+    enabled: yes
+
+- name: ServerName Directive
+  lineinfile:
+    path: "{{ web_path }}"
+    regexp: '^ServerName'
+    insertafter: '^#ServerName'
+    line: "ServerName {{ ansible_fqdn }}:80"
+  notify: restart_web
+  when: ansible_distribution == "Debian"
+
+- name: DocRoot Permissions
+  file:
+    path: "/var/www/html"
+    mode: '3750'
+    owner: 'root'
+    group: "{{ web_group }}"
+
+- name: Copy websitefile template
+  template:
+    src: index.html.j2
+    dest: "/var/www/html/index.html"
+
+- name: firewalld Centos
+  systemd:
+    name: firewalld
+    enabled: true
+    state: started
+  when: ansible_distribution == "CentOS"
+
+- name: firewall Debian
+  systemd:
+    name: ufw
+    enabled: true
+    state: started
+  when: ansible_distribution == "Debian"
+
+- name: Open http port Ubuntu
+  ufw:
+    port: "{{ item }}"
+    rule: allow
+    state: enabled
+  when: ansible_distribution == "Debian"
+  loop:
+    - http
+    - ssh
+
+- name: Open http port CentOS
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  vars:
+    - ansible_python_interpreter: /usr/bin/python
+  when: ansible_distribution == "CentOS"
+  loop:
+    - http
+    - ssh
+    - https

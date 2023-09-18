@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ansible_hostname }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        p {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ ansible_hostname }}</h1>
+    </header>
+    <main>
+        <section>
+            <h2>{{ ansible_virtualization_type }}</h2>
+            <p>Ceci est un exemple de paragraphe dans la section 1.</p>
+        </section>
+        <section>
+            <h2>{{ ansible_os_family }}</h2>
+            <p>Ceci est un autre exemple de paragraphe dans la section 2.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 {{ ansible_hostname }}</p>
+    </footer>
+</body>
+</html>
